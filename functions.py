@@ -44,7 +44,7 @@ def analyze_pf_people(df):
         }
 
 def analyze_pg_people(df):
-    people = df["Nome"].to_list()
+    people = df["Denominazione"].to_list()
     for person in people:
         U1,L1,T,y,Credito = detrazioni('PG',person, 'Denominazione', df)
         U2, L2, T2 = Liq(person, 'Denominazione', df, 'PG')
