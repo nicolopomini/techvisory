@@ -88,28 +88,28 @@ def get_people_that_sell(df):
             people_that_sell.append(person)
     return people_that_sell
 
-def get_people_to_buy(df, people_that_sell):
+def get_people_to_buy(df, people_that_sell, df_people):
     for business in results_for_pg:
-        if sum(results_for_pg[business]["lower_estimate"]) > int(df["Credito"][0]):
+        if sum(results_for_pg[business]["lower_estimate"]) < int(df["Credito"][0]):
             return None
         else:
-            people_values = {people: sell_range(df, people) for people in people_that_sell}
+            people_values = {people: sell_range(df_people, people) for people in people_that_sell}
             sorted_people = {k: v for k, v in sorted(people_values.items(), key=lambda item: item[1][0])}
             budget = int(df["Liquidità 2018"][0])
             total_spent = 0
             bought_people = []
             for people in sorted_people:
-                if total_spent + sorted_people[people][0] * 1.02 > budget or total_spent > (int(df["Credito"][0]) - sum(results_for_pg[business]["lower_estimate"])):
+                if total_spent + sorted_people[people][0] * 1.02 > budget or total_spent > (sum(results_for_pg[business]["lower_estimate"]) - int(df["Credito"][0])):
                     break
                 bought_people.append(people)
                 total_spent += sorted_people[people][0]
             return bought_people
 
-def do_offer(people_to_buy, df):
+def do_offer(people_to_buy, df, df_people):
     analyze_pg_people(df)
     if people_to_buy:
-      people_values = {people: sell_range(df, people) for people in people_to_buy if people_to_buy[people] is not None}
-      return {people: (people_values[people][0] * 0.98, people_values[people][0] * 1.02) for people in people_values}
+      people_values = {people: sell_range(df_people, people) for people in people_to_buy}
+      return {people: (int(people_values[people][0] * 0.98), int(people_values[people][0] * 1.02)) for people in people_values}
     return {}
 
             
