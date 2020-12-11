@@ -223,7 +223,7 @@ def plot_Detrazioni(T, U1, L1, Person, Categoria, y):
                    line=go.scatter.Line(color="black"),
                    name='Credito'))
     fig.update_layout(
-        title='Storico e stima delle possibili detrazioni future per ' +
+        title='Storico e stima della capienza fiscale per ' +
         str(Person),
         xaxis_title="Year",
         yaxis_title="€",
@@ -281,7 +281,7 @@ def plot_Liq(U, L, T, Person):
                    name='Lower estimate')
     ])
     fig.update_layout(
-        title='Storico e stima della futura liquidità per ' + str(Person),
+        title='Storico e stima della capacità finanziaria per ' + str(Person),
         xaxis_title="Year",
         yaxis_title="€",
     )
