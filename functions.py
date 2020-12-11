@@ -81,7 +81,7 @@ def sell_range(df, person):
 
 def get_people_that_sell(df):
     people_that_sell = []
-    analyze_pf_people()
+    analyze_pf_people(df)
     for person in results_for_people:
         range = sell_range(df, person)
         if range is not None:
