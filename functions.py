@@ -191,7 +191,7 @@ def detrazioni(Categoria, Person, Den, DF):
     Lower_estimate = []
     y = []
     for i in range(5):
-        y.append(Credito * 1.1 * 0.2)
+        y.append(Credito * 1.1 * 0.2) 
     for i in range(len(Var[0])):
         Lower_estimate.append(min(Var[0][i], Var2[0][i]))
         Upper_estimate.append(max(Var[0][i], Var2[0][i]))
@@ -251,7 +251,7 @@ def Liq(Person, Den, DF, Categoria):
                     elif j[:5] == 'IRPEF':
                         value -= DF[j][i]
                     elif j[:5] == 'Oneri':
-                        value += DF[j][i]
+                        value += DF[j][i] - 30720
                         x.append(value)
                         value = 0
     x = np.flip(x)
