@@ -88,14 +88,28 @@ def get_people_that_sell(df):
             people_that_sell.append(person)
     return people_that_sell
 
-# def get_businesses_that_buy(df, people_that_sell):
-#     businesses_that_buy = []
-#     for business in results_for_pg:
-#         if sum(results_for_pg[business]["lower_estimate"]) > int(df["Credito"][0]):
-#             return None
-#         else:
-#             people_values = {people: sell_range(df, people) for people in people_that_sell}
-#             sorted_people = 
+def get_people_to_buy(df, people_that_sell):
+    for business in results_for_pg:
+        if sum(results_for_pg[business]["lower_estimate"]) > int(df["Credito"][0]):
+            return None
+        else:
+            people_values = {people: sell_range(df, people) for people in people_that_sell}
+            sorted_people = {k: v for k, v in sorted(people_values.items(), key=lambda item: item[1][0])}
+            budget = int(df["Liquidità 2018"][0])
+            total_spent = 0
+            bought_people = []
+            for people in sorted_people:
+                if total_spent + sorted_people[people][0] * 1.02 > budget or total_spent > (int(df["Credito"][0]) - sum(results_for_pg[business]["lower_estimate"])):
+                    break
+                bought_people.append(people)
+                total_spent += sorted_people[people][0]
+            return bought_people
+
+def do_offer(people_to_buy, df):
+    people_values = {people: sell_range(df, people) for people in people_to_buy}
+    return {people: (people_values[people][0] * 0.98, people_values[people][0] * 1.02) for people in people_values}
+
+            
 
 
 
