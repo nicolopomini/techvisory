@@ -106,7 +106,8 @@ def get_people_to_buy(df, people_that_sell):
             return bought_people
 
 def do_offer(people_to_buy, df):
-    people_values = {people: sell_range(df, people) for people in people_to_buy}
+    analyze_pg_people(df)
+    people_values = {people: sell_range(df, people) for people in people_to_buy if people_to_buy[people] is not None}
     return {people: (people_values[people][0] * 0.98, people_values[people][0] * 1.02) for people in people_values}
 
             
