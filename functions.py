@@ -2,29 +2,101 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
-FILE_ID1 = '1oeUyQKKXRrY415mi3wMkNG3GzAj-__3m'
-FILE_NAME1 = 'POC_Data_PF.csv'
-FILE_ID2 = '1iqL9LCkqObRxS618M_Ce4wxa5gp67n97'
-FILE_NAME2 = 'POC_Data_PG.csv'
+PERSONE_GIURIDICHE_URL = 'https://raw.githubusercontent.com/nicolopomini/techvisory/master/POC_data_PG.csv'
+PERSONE_FISICHE_URL = 'https://raw.githubusercontent.com/nicolopomini/techvisory/master/POC_Data_PF.csv'
+
+results_for_people = {}
+results_for_pg = {}
 
 
 def get_dataframe(categoria, drive):
     if categoria == 'PF':
-        FILE_ID = FILE_ID1
-        FILE_NAME = FILE_NAME1
         sep = ";"
+        url = PERSONE_FISICHE_URL
     else:
-        FILE_ID = FILE_ID2
-        FILE_NAME = FILE_NAME2
         sep = ","
+        url = PERSONE_GIURIDICHE_URL
     if categoria == 'PF':
         Den = 'Nome'
     else:
         Den = 'Denominazione'
-    downloaded = drive.CreateFile({'id': FILE_ID})
-    downloaded.GetContentFile(FILE_NAME)
-    DF = pd.read_csv(FILE_NAME, sep)
+    DF = pd.read_csv(url, sep)
     return DF, Den
+
+
+def get_persona_giuridica():
+    return pd.read_csv(PERSONE_GIURIDICHE_URL, ',')
+
+def get_persona_fisica():
+    return pd.read_csv(PERSONE_FISICHE_URL, ';')
+
+
+def analyze_pf_people(df):
+    people = df["Nome"].to_list()
+    for person in people:
+        U1,L1,T,y,Credito = detrazioni('PF',person, 'Nome', df)
+        results_for_people[person] = {
+            "upper_estimate": U1,
+            "lower_estimate": L1,
+            "time": T,
+            "credito": Credito,
+            "credito_for_plot": y
+        }
+
+def analyze_pg_people(df):
+    people = df["Nome"].to_list()
+    for person in people:
+        U1,L1,T,y,Credito = detrazioni('PG',person, 'Denominazione', df)
+        U2, L2, T2 = Liq(person, 'Denominazione', df, 'PG')
+        results_for_pg[person] = {
+            "upper_estimate": U1,
+            "lower_estimate": L1,
+            "time": T,
+            "credito": Credito,
+            "credito_for_plot": y,
+            "liquidita_upper": U2,
+            "liquidita_lower": L2,
+            "liquidita_time": T2
+        }
+
+
+def sell_range(df, person):
+    actual_value = check_status(df, person, 'PF', results_for_people[person]["lower_estimate"], 'Nome')
+    if actual_value < 0:
+        value = actual_value
+    else:
+        coeff_future_value = future_value(df, person, "PF", results_for_people[person]["time"], results_for_people[person]["lower_estimate"], "Nome", results_for_people[person]["credito"])
+        if coeff_future_value < 0:
+            value = coeff_future_value
+        else:
+            A = advantage(df, person, results_for_people[person]["lower_estimate"], 'PF', 'Nome')
+            value = A
+    if value >= 0:
+        return None
+    else:
+        minimum = results_for_people[person]["credito"] + results_for_people[person]["credito"] * value / 100
+        maximum = int(results_for_people[person]["credito"] * 1.05)
+        return minimum, maximum
+
+
+def get_people_that_sell(df):
+    people_that_sell = []
+    analyze_pf_people()
+    for person in results_for_people:
+        range = sell_range(df, person)
+        if range is not None:
+            people_that_sell.append(person)
+    return people_that_sell
+
+# def get_businesses_that_buy(df, people_that_sell):
+#     businesses_that_buy = []
+#     for business in results_for_pg:
+#         if sum(results_for_pg[business]["lower_estimate"]) > int(df["Credito"][0]):
+#             return None
+#         else:
+#             people_values = {people: sell_range(df, people) for people in people_that_sell}
+#             sorted_people = 
+
 
 
 def future_prediction(h, years, Time, variable):
